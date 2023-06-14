@@ -6,4 +6,7 @@ export const environment = {
     password: process.env.DATABASE_PASSWORD || '1234',
     name: process.env.DATABASE_NAME || 'postgres',
   },
+  jwt: {
+    secret: process.env.JWT_SECRET || 'big_secret',
+  },
 };
