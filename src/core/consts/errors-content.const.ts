@@ -1,6 +1,9 @@
 export const REGEX_CPF =
   '([0-9]{2}[.]?[0-9]{3}[.]?[0-9]{3}[/]?[0-9]{4}[-]?[0-9]{2})|([0-9]{3}[.]?[0-9]{3}[.]?[0-9]{3}[-]?[0-9]{2})';
 
+export const REGEX_CNPJ =
+  'd{2}.?d{3}.?d{3}/?d{4}-?d{2}\
+';
 export const MAX_LENGTH_NAME = 20;
 export const MIN_LENGTH_NAME = 3;
 export const MIN_LENGTH_PASSWORD = 3;

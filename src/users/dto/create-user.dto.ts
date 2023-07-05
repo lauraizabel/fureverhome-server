@@ -15,6 +15,7 @@ import {
   MAX_LENGTH_NAME,
   MIN_LENGTH_NAME,
   MIN_LENGTH_PASSWORD,
+  REGEX_CNPJ,
   REGEX_CPF,
 } from 'src/core/consts/errors-content.const';
 import { UserAddress } from 'src/users/entities/user-address.entity';
@@ -51,6 +52,11 @@ export class CreateUserDto extends UserAddress {
   @IsOptional()
   @Matches(REGEX_CPF)
   cpf: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(REGEX_CNPJ)
+  cnpj: string;
 
   @IsUrl()
   @IsOptional()

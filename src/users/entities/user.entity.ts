@@ -34,6 +34,9 @@ export class User {
   cpf: string;
 
   @Column({ nullable: true })
+  cnpj: string;
+
+  @Column({ nullable: true })
   picture: string;
 
   @Column()
