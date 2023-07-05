@@ -8,6 +8,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { UserType } from 'src/users/enum/user-type.enum';
 import { usersRepositoryMock } from 'src/core/mocks/user.repository.mock';
+import { UserAddress } from 'src/users/entities/user-address.entity';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -27,6 +28,7 @@ describe('AuthService', () => {
     picture: faker.internet.url(),
     type: UserType.FISICAL,
     updatedAt: new Date(),
+    userAddress: {} as UserAddress,
   };
 
   beforeEach(async () => {

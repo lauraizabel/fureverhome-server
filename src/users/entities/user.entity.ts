@@ -1,8 +1,10 @@
+import { UserAddress } from 'src/users/entities/user-address.entity';
 import { UserType } from 'src/users/enum/user-type.enum';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -36,6 +38,9 @@ export class User {
 
   @Column()
   type: UserType;
+
+  @OneToOne(() => UserAddress, (userAddress) => userAddress.user)
+  userAddress!: UserAddress;
 
   @UpdateDateColumn()
   updatedAt: Date;

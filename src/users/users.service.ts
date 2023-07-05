@@ -9,13 +9,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from 'src/users/repository/users.repository';
 import { UsersAddressRepository } from 'src/users/repository/users-address.repository';
 import { PasswordService } from 'src/core/services/password.service';
+import { UploadService } from 'src/core/services/upload.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly usersAddress: UsersAddressRepository,
+    private readonly usersAddressRepository: UsersAddressRepository,
     private readonly passwordService: PasswordService,
+    private readonly uploadService: UploadService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -27,13 +29,23 @@ export class UsersService {
       throw new BadRequestException('Email already exists');
     }
 
-    const address = await this.usersAddress.create(createUserDto);
-
     createUserDto.password = await this.passwordService.hashPassword(
       createUserDto.password,
     );
 
+    if (createUserDto.picture) {
+      createUserDto.picture = await this.uploadService.uploadFile({
+        base64Image: createUserDto.picture,
+        fileName: `${createUserDto.firstName}_${new Date().toISOString()}`,
+      });
+    }
+
     const user = await this.usersRepository.create(createUserDto);
+    const address = await this.usersAddressRepository.create({
+      ...createUserDto,
+      user,
+    });
+
     const { password, ...rest } = user;
 
     return { ...address, ...rest, id: user.id };

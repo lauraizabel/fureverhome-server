@@ -9,4 +9,9 @@ export const environment = {
   jwt: {
     secret: process.env.JWT_SECRET || 'big_secret',
   },
+  image: {
+    publicKey: process.env.IMAGE_PUBLIC_KEY || 'key',
+    privateKey: process.env.IMAGE_PRIVATE_KEY || 'key',
+    urlEndpoint: process.env.IMAGE_URL_ENDPOINT || 'url',
+  },
 };

@@ -29,8 +29,8 @@ export class UsersRepository {
 
   async create(createUserDto: CreateUserDto) {
     const user = this.userRepository.create(createUserDto);
-    await this.userRepository.save(createUserDto);
-    return user;
+    const user_ = await this.userRepository.save(user);
+    return user_;
   }
 
   findAll() {

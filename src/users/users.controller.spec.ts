@@ -6,12 +6,10 @@ import { usersAddressRepositoryMock } from 'src/core/mocks/user-address.reposito
 import { UsersRepository } from 'src/users/repository/users.repository';
 import { UsersAddressRepository } from 'src/users/repository/users-address.repository';
 import { PasswordService } from 'src/core/services/password.service';
+import { UploadService } from 'src/core/services/upload.service';
 
 describe('UsersController', () => {
   let usersController: UsersController;
-  let usersRepository: UsersRepository;
-  let usersAddressRepository: UsersAddressRepository;
-  let passwordService: PasswordService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,6 +19,7 @@ describe('UsersController', () => {
         UsersRepository,
         UsersAddressRepository,
         PasswordService,
+        UploadService,
         usersRepositoryMock,
         usersAddressRepositoryMock,
       ],

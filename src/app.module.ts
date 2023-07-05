@@ -7,7 +7,6 @@ import { databaseConfig } from 'src/database/config';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from 'src/core/config/jwt.config';
-
 @Module({
   imports: [
     TypeOrmModule.forRoot({ ...databaseConfig }),

@@ -75,7 +75,7 @@ export class CreateUserDto extends UserAddress {
   @IsNotEmpty()
   neighborhood: string;
 
-  @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
   number?: string;
 }

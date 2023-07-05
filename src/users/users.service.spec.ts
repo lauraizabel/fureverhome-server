@@ -5,6 +5,7 @@ import { UsersRepository } from 'src/users/repository/users.repository';
 import { PasswordService } from 'src/core/services/password.service';
 import { usersRepositoryMock } from 'src/core/mocks/user.repository.mock';
 import { usersAddressRepositoryMock } from 'src/core/mocks/user-address.repository.mock';
+import { UploadService } from 'src/core/services/upload.service';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -19,6 +20,7 @@ describe('UsersService', () => {
         UsersRepository,
         UsersAddressRepository,
         PasswordService,
+        UploadService,
         usersRepositoryMock,
         usersAddressRepositoryMock,
       ],
