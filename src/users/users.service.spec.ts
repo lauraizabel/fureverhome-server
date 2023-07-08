@@ -5,9 +5,9 @@ import { UsersRepository } from 'src/users/repository/users.repository';
 import { PasswordService } from 'src/core/services/password.service';
 import { usersRepositoryMock } from 'src/core/mocks/user.repository.mock';
 import { usersAddressRepositoryMock } from 'src/core/mocks/user-address.repository.mock';
-import { UploadService } from 'src/core/services/upload.service';
+import { FileService } from 'src/file/services/file.service';
 
-describe('UsersService', () => {
+describe.only('UsersService', () => {
   let usersService: UsersService;
   let usersRepository: UsersRepository;
   let usersAddressRepository: UsersAddressRepository;
@@ -20,9 +20,8 @@ describe('UsersService', () => {
         UsersRepository,
         UsersAddressRepository,
         PasswordService,
-        UploadService,
+        FileService,
         usersRepositoryMock,
-        usersAddressRepositoryMock,
       ],
     }).compile();
 

@@ -7,12 +7,16 @@ import { databaseConfig } from 'src/database/config';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from 'src/core/config/jwt.config';
+import { AnimalsModule } from './animals/animals.module';
+import { FileModule } from './file/file.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({ ...databaseConfig }),
     JwtModule.register({ ...jwtConfig }),
+    FileModule,
     UsersModule,
     AuthModule,
+    AnimalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

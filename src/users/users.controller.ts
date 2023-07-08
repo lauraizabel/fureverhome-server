@@ -19,15 +19,28 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { validate } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/core/decorator/public.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseInterceptors(FileInterceptor('picture'))
   @Post()
-  async create(
-    @Body() createUserDto: CreateUserDto,
+  @Public()
+  async create(@Body() createUserDto: CreateUserDto) {
+    const errors = await validate(createUserDto);
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    return this.usersService.create(createUserDto);
+  }
+
+  @Post(':id/image')
+  @UseInterceptors(FileInterceptor('picture'))
+  async uploadPicture(
+    @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
@@ -35,13 +48,17 @@ export class UsersController {
     )
     file: Express.Multer.File,
   ) {
-    const errors = await validate(createUserDto);
+    const buffer = file.buffer.toString('base64');
+    const fileName = file.filename;
+    return this.usersService.uploadPicture(+id, buffer, fileName);
+  }
 
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-    createUserDto.picture = file.buffer.toString('base64');
-    return this.usersService.create(createUserDto);
+  @Delete(':id/image/:imageId')
+  async deletePicture(
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.usersService.deletePicture(+id, imageId);
   }
 
   @Get()

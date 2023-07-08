@@ -58,10 +58,6 @@ export class CreateUserDto extends UserAddress {
   @Matches(REGEX_CNPJ)
   cnpj: string;
 
-  @IsUrl()
-  @IsOptional()
-  picture: string;
-
   @IsEnum(UserType)
   type: UserType;
 

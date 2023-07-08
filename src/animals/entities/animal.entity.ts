@@ -1,0 +1,49 @@
+import { CommonColors } from 'src/animals/enum/animal-colors.enum';
+import { AnimalDewormed } from 'src/animals/enum/animal-dewormed.enum';
+import { AnimalType } from 'src/animals/enum/animal-type.enum';
+import { File } from 'src/file/entities/file.entity';
+import { User } from 'src/users/entities/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+@Entity()
+export class Animal {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  type: AnimalType;
+
+  @Column()
+  color: CommonColors;
+
+  @Column()
+  description: string;
+
+  @Column({ nullable: true })
+  name?: string;
+
+  @Column()
+  dewormed: AnimalDewormed;
+
+  @ManyToOne(() => User, (user) => user.animal)
+  user: User;
+
+  @OneToMany(() => File, (file) => file.animal, {
+    cascade: true,
+  })
+  files: File[];
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
+}

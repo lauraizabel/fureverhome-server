@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpCode,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,7 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from 'src/users/repository/users.repository';
 import { UsersAddressRepository } from 'src/users/repository/users-address.repository';
 import { PasswordService } from 'src/core/services/password.service';
-import { UploadService } from 'src/core/services/upload.service';
+import { FileService } from 'src/file/services/file.service';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +16,7 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly usersAddressRepository: UsersAddressRepository,
     private readonly passwordService: PasswordService,
-    private readonly uploadService: UploadService,
+    private readonly fileService: FileService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -33,13 +32,6 @@ export class UsersService {
       createUserDto.password,
     );
 
-    if (createUserDto.picture) {
-      createUserDto.picture = await this.uploadService.uploadFile({
-        base64Image: createUserDto.picture,
-        fileName: `${createUserDto.firstName}_${new Date().toISOString()}`,
-      });
-    }
-
     const user = await this.usersRepository.create(createUserDto);
     const address = await this.usersAddressRepository.create({
       ...createUserDto,
@@ -53,6 +45,41 @@ export class UsersService {
 
   getAll() {
     return this.usersRepository.findAll();
+  }
+
+  async uploadPicture(userId: number, base64Image: string, fileName: string) {
+    const user = await this.findOne(userId);
+
+    const result = await this.fileService.uploadFile({
+      base64Image,
+      fileName,
+      id: userId,
+      type: 'user',
+    });
+
+    user.picture = result;
+
+    const updatedUser = await this.update(userId, user);
+
+    return updatedUser;
+  }
+
+  async deletePicture(userId: number, fileId: string) {
+    const file = await this.fileService.getFileDetails(fileId);
+
+    if (!file) {
+      throw new BadRequestException('File not found');
+    }
+
+    const user = await this.findOne(userId);
+
+    await this.fileService.deleteFile(fileId);
+
+    user.picture = null;
+
+    const updatedUser = await this.update(userId, user);
+
+    return updatedUser;
   }
 
   findOne(id: number) {

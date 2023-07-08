@@ -6,9 +6,9 @@ import { usersAddressRepositoryMock } from 'src/core/mocks/user-address.reposito
 import { UsersRepository } from 'src/users/repository/users.repository';
 import { UsersAddressRepository } from 'src/users/repository/users-address.repository';
 import { PasswordService } from 'src/core/services/password.service';
-import { UploadService } from 'src/core/services/upload.service';
+import { FileService } from 'src/file/services/file.service';
 
-describe('UsersController', () => {
+describe.only('UsersController', () => {
   let usersController: UsersController;
 
   beforeEach(async () => {
@@ -19,7 +19,7 @@ describe('UsersController', () => {
         UsersRepository,
         UsersAddressRepository,
         PasswordService,
-        UploadService,
+        FileService,
         usersRepositoryMock,
         usersAddressRepositoryMock,
       ],
