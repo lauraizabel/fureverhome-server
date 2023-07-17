@@ -39,14 +39,14 @@ export class User {
   @Column({ nullable: true })
   cnpj: string;
 
-  @OneToOne(() => File, (file) => file.user, {
-    nullable: true,
-    cascade: true,
-  })
+  @OneToOne(() => File, (file) => file.user)
   picture?: File;
 
   @Column()
   type: UserType;
+
+  @Column()
+  dateOfBirth: Date;
 
   @OneToOne(() => UserAddress, (userAddress) => userAddress.user)
   userAddress!: UserAddress;

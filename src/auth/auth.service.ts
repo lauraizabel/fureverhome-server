@@ -19,7 +19,7 @@ export class AuthService {
   async signIn(
     email: string,
     pass: string,
-  ): Promise<{ access_token: string; user: Partial<User> }> {
+  ): Promise<{ accessToken: string; user: Partial<User> }> {
     const user = await this.usersRepository.findOneByEmail(email);
 
     if (!user) {
@@ -39,7 +39,7 @@ export class AuthService {
 
     const payload = { sub: user.id, email: user.email };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload),
       user: result,
     };
   }

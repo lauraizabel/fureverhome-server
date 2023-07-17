@@ -23,7 +23,10 @@ export class UsersRepository {
   ) {}
 
   findOneByEmail(email: string) {
-    return this.userRepository.findOneBy({ email });
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['userAddress', 'animal'],
+    });
   }
 
   async create(createUserDto: CreateUserDto) {
