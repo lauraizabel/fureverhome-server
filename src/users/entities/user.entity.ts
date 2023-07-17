@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import { Animal } from 'src/animals/entities/animal.entity';
 import { File } from 'src/file/entities/file.entity';
 import { UserAddress } from 'src/users/entities/user-address.entity';
