@@ -36,6 +36,9 @@ export class User {
   cpf: string;
 
   @Column({ nullable: true })
+  phone: string;
+
+  @Column({ nullable: true })
   cnpj: string;
 
   @OneToOne(() => File, (file) => file.user)

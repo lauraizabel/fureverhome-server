@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAnimalDto } from 'src/animals/dto/create-animal.dto';
 import { UpdateAnimalDto } from 'src/animals/dto/update-animal.dto';
 import { Animal } from 'src/animals/entities/animal.entity';
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -19,20 +20,30 @@ export class AnimalRepository {
   }
 
   findAll() {
-    return this.animalRepository.find();
+    return this.animalRepository.find({
+      relations: ['files', 'user'],
+    });
   }
 
   findOne(id: number) {
     return this.animalRepository.findOne({
       where: { id },
+      relations: ['user'],
     });
   }
 
   update(id: number, updateUserDto: UpdateAnimalDto) {
-    return this.animalRepository.update(id, updateUserDto);
+    return this.animalRepository.save(updateUserDto);
   }
 
   remove(id: number) {
     return this.animalRepository.delete({ id });
+  }
+
+  findByUser(user: User) {
+    return this.animalRepository.find({
+      where: { user },
+      relations: ['files'],
+    });
   }
 }

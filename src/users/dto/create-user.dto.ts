@@ -1,14 +1,14 @@
 import {
   IsNotEmpty,
   IsOptional,
-  IsUrl,
   Matches,
   MaxLength,
   MinLength,
   IsEmail,
   IsString,
   IsEnum,
-  IsNumber,
+  IsDate,
+  IsDateString,
 } from 'class-validator';
 import {
   ErrorsMessages,
@@ -18,10 +18,9 @@ import {
   REGEX_CNPJ,
   REGEX_CPF,
 } from 'src/core/consts/errors-content.const';
-import { UserAddress } from 'src/users/entities/user-address.entity';
 import { UserType } from 'src/users/enum/user-type.enum';
 
-export class CreateUserDto extends UserAddress {
+export class CreateUserDto {
   @IsString({ message: ErrorsMessages.name.alphanumeric })
   @MaxLength(MAX_LENGTH_NAME, { message: ErrorsMessages.name.maxLength })
   @MinLength(MIN_LENGTH_NAME, { message: ErrorsMessages.name.minLength })
@@ -57,6 +56,14 @@ export class CreateUserDto extends UserAddress {
   @IsOptional()
   @Matches(REGEX_CNPJ)
   cnpj: string;
+
+  @IsDateString()
+  @IsOptional()
+  dateOfBirth: Date;
+
+  @IsString()
+  @IsOptional()
+  phone: string;
 
   @IsEnum(UserType)
   type: UserType;
