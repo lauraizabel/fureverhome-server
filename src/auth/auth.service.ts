@@ -35,7 +35,9 @@ export class AuthService {
       throw new BadRequestException('Email or password wrong');
     }
 
-    const { password, ...result } = user;
+    const loadedUser = await this.usersRepository.findOne(user.id);
+
+    const { password, ...result } = loadedUser;
 
     const payload = { sub: user.id, email: user.email };
     return {

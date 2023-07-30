@@ -18,8 +18,12 @@ export class AnimalsService {
     private readonly userService: UsersService,
   ) {}
 
-  async create(createAnimalDto: CreateAnimalDto) {
-    const animal = await this.animalRepository.create(createAnimalDto);
+  async create(createAnimalDto: CreateAnimalDto, userId: number) {
+    const user = await this.userService.findOne(userId);
+    const animal = await this.animalRepository.create({
+      ...createAnimalDto,
+      user,
+    });
     return { ...animal };
   }
 

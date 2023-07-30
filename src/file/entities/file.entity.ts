@@ -29,6 +29,7 @@ export class File {
 
   @OneToOne(() => User, (user) => user.picture, {
     nullable: true,
+    cascade: true,
   })
   user: User;
 

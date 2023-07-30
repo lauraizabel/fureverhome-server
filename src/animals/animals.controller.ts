@@ -31,7 +31,7 @@ export class AnimalsController {
       throw new BadRequestException('Missing user');
     }
 
-    return this.animalsService.create(createAnimalDto);
+    return this.animalsService.create(createAnimalDto, user.sub);
   }
 
   @UseGuards(AuthGuard)

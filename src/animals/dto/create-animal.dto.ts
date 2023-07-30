@@ -9,6 +9,8 @@ import { AnimalType } from 'src/animals/enum/animal-type.enum';
 import { CommonColors } from 'src/animals/enum/animal-colors.enum';
 import { AnimalDewormed } from 'src/animals/enum/animal-dewormed.enum';
 import { User } from 'src/users/entities/user.entity';
+import { AnimalSize } from '../enum/animal-size.enum';
+import { AnimalCastrated } from '../enum/animal-castrated.enum';
 
 export class CreateAnimalDto {
   @IsEnum(AnimalType)
@@ -32,6 +34,14 @@ export class CreateAnimalDto {
   @IsEnum(AnimalDewormed)
   @IsNotEmpty()
   dewormed: AnimalDewormed;
+
+  @IsEnum(AnimalSize)
+  @IsNotEmpty()
+  size: AnimalSize;
+
+  @IsEnum(AnimalCastrated)
+  @IsNotEmpty()
+  castrated: AnimalCastrated;
 
   @IsOptional()
   user?: User;

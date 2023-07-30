@@ -52,7 +52,7 @@ export class UsersController {
     file: Express.Multer.File,
   ) {
     const buffer = file.buffer.toString('base64');
-    const fileName = file.filename;
+    const fileName = file.filename || file.originalname;
     return this.usersService.uploadPicture(+id, buffer, fileName);
   }
 
@@ -69,6 +69,12 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.getAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('ongs')
+  findAllOngs() {
+    return this.usersService.getAllOngs();
   }
 
   @UseGuards(AuthGuard)

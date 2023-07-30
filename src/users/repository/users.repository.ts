@@ -3,21 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { User } from 'src/users/entities/user.entity';
-import { FindOptionsSelectByString, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { UserType } from '../enum/user-type.enum';
 
 @Injectable()
 export class UsersRepository {
-  private readonly rowsToBeSelected: FindOptionsSelectByString<User> = [
-    'cpf',
-    'createdAt',
-    'email',
-    'firstName',
-    'id',
-    'job',
-    'lastName',
-    'type',
-    'updatedAt',
-  ];
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
@@ -25,6 +15,7 @@ export class UsersRepository {
   findOneByEmail(email: string) {
     return this.userRepository.findOne({
       where: { email },
+      select: { id: true, email: true, password: true },
       relations: ['userAddress', 'animal'],
     });
   }
@@ -36,20 +27,26 @@ export class UsersRepository {
   }
 
   findAll() {
+    return this.userRepository.find();
+  }
+
+  findAllOngs() {
     return this.userRepository.find({
-      select: this.rowsToBeSelected,
+      where: {
+        type: UserType.ONG,
+      },
+      relations: ['animal', 'userAddress', 'picture'],
     });
   }
 
   findOne(id: number) {
     return this.userRepository.findOne({
       where: { id },
-      select: this.rowsToBeSelected,
     });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update(id, updateUserDto);
+    return this.userRepository.save(updateUserDto);
   }
 
   remove(id: number) {

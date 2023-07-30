@@ -6,11 +6,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { AnimalType } from '../../animals/enum/animal-type.enum';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -23,7 +26,7 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column({ unique: true })
@@ -41,6 +44,13 @@ export class User {
   @Column({ nullable: true })
   cnpj: string;
 
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ default: [], array: true, enum: AnimalType, type: 'enum' })
+  animalTypes: AnimalType[];
+
+  @JoinColumn()
   @OneToOne(() => File, (file) => file.user)
   picture?: File;
 

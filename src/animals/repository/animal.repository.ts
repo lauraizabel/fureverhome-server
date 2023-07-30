@@ -18,6 +18,7 @@ export class AnimalRepository {
     const animal_ = await this.animalRepository.save(animal);
     return animal_;
   }
+  userRepository;
 
   findAll() {
     return this.animalRepository.find({
@@ -41,9 +42,10 @@ export class AnimalRepository {
   }
 
   findByUser(user: User) {
+    const { id } = user;
     return this.animalRepository.find({
-      where: { user },
-      relations: ['files'],
+      where: { user: { id } },
+      relations: ['files', 'user'],
     });
   }
 }

@@ -12,6 +12,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { AnimalSize } from '../enum/animal-size.enum';
+import { AnimalCastrated } from '../enum/animal-castrated.enum';
 
 @Entity()
 export class Animal {
@@ -32,6 +34,12 @@ export class Animal {
 
   @Column()
   dewormed: AnimalDewormed;
+
+  @Column()
+  size: AnimalSize;
+
+  @Column()
+  castrated: AnimalCastrated;
 
   @ManyToOne(() => User, (user) => user.animal)
   user: User;

@@ -47,6 +47,10 @@ export class UsersService {
     return this.usersRepository.findAll();
   }
 
+  getAllOngs() {
+    return this.usersRepository.findAllOngs();
+  }
+
   async uploadPicture(userId: number, base64Image: string, fileName: string) {
     const user = await this.findOne(userId);
 
@@ -58,10 +62,14 @@ export class UsersService {
     });
 
     user.picture = result;
-
-    const updatedUser = await this.update(userId, user);
-
-    return updatedUser;
+    console.log(user);
+    try {
+      const updatedUser = await this.usersRepository.update(user.id, user);
+      return updatedUser;
+    } catch (e) {
+      console.log({ e });
+      throw new BadRequestException(e);
+    }
   }
 
   async deletePicture(userId: number, fileId: string) {
@@ -77,7 +85,7 @@ export class UsersService {
 
     user.picture = null;
 
-    const updatedUser = await this.update(userId, user);
+    const updatedUser = await this.usersRepository.update(user.id, user);
 
     return updatedUser;
   }

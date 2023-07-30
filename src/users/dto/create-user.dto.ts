@@ -9,6 +9,8 @@ import {
   IsEnum,
   IsDate,
   IsDateString,
+  isEnum,
+  IsArray,
 } from 'class-validator';
 import {
   ErrorsMessages,
@@ -19,6 +21,7 @@ import {
   REGEX_CPF,
 } from 'src/core/consts/errors-content.const';
 import { UserType } from 'src/users/enum/user-type.enum';
+import { AnimalType } from '../../animals/enum/animal-type.enum';
 
 export class CreateUserDto {
   @IsString({ message: ErrorsMessages.name.alphanumeric })
@@ -60,6 +63,15 @@ export class CreateUserDto {
   @IsDateString()
   @IsOptional()
   dateOfBirth: Date;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsEnum(AnimalType, { each: true })
+  @IsArray()
+  @IsOptional()
+  animalTypes: AnimalType[];
 
   @IsString()
   @IsOptional()
