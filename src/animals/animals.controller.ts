@@ -12,6 +12,7 @@ import {
   UploadedFiles,
   UseGuards,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
@@ -19,6 +20,7 @@ import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { isArray } from 'class-validator';
+import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 
 @Controller('animals')
 export class AnimalsController {
@@ -99,20 +101,25 @@ export class AnimalsController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.animalsService.findAll();
+  findAll(@Query() pageOptionsDto: PageOptionsDto) {
+    console.log(pageOptionsDto);
+    return this.animalsService.findAll(pageOptionsDto);
   }
 
   @UseGuards(AuthGuard)
   @Get('user/:id')
-  findByUser(@Request() req, @Param('id') id: string) {
+  findByUser(
+    @Request() req,
+    @Param('id') id: string,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ) {
     const user = req.user;
 
     if (!user) {
       throw new BadRequestException('Missing user');
     }
 
-    return this.animalsService.findByUser(+id);
+    return this.animalsService.findByUser(+id, pageOptionsDto);
   }
 
   @UseGuards(AuthGuard)

@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAnimalDto } from 'src/animals/dto/create-animal.dto';
 import { UpdateAnimalDto } from 'src/animals/dto/update-animal.dto';
 import { Animal } from 'src/animals/entities/animal.entity';
+import { PageMetaDto } from 'src/core/dto/page-meta.dto';
+import { PageOptionsDto } from 'src/core/dto/page-options.dto';
+import { PageDto } from 'src/core/dto/page.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -19,10 +22,25 @@ export class AnimalRepository {
     return animal_;
   }
 
-  findAll() {
-    return this.animalRepository.find({
-      relations: ['files', 'user'],
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Animal>> {
+    const queryBuilder = this.animalRepository.createQueryBuilder('animal');
+
+    queryBuilder
+      .leftJoinAndSelect('animal.user', 'user')
+      .leftJoinAndSelect('animal.files', 'files')
+      .orderBy('animal.id')
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({
+      pageOptionsDto,
+      itemCount,
     });
+
+    return new PageDto(entities, pageMetaDto);
   }
 
   findOne(id: number) {
@@ -40,11 +58,27 @@ export class AnimalRepository {
     return this.animalRepository.delete({ id });
   }
 
-  findByUser(user: User) {
+  async findByUser(user: User, pageOptionsDto: PageOptionsDto) {
     const { id } = user;
-    return this.animalRepository.find({
-      where: { user: { id } },
-      relations: ['files', 'user'],
+
+    const queryBuilder = this.animalRepository.createQueryBuilder('animal');
+
+    queryBuilder
+      .leftJoinAndSelect('animal.user', 'user')
+      .leftJoinAndSelect('animal.files', 'files')
+      .where('user.id = :id', { id })
+      .orderBy('animal.id')
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({
+      pageOptionsDto,
+      itemCount,
     });
+
+    return new PageDto(entities, pageMetaDto);
   }
 }

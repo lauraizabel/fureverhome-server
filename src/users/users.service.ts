@@ -9,6 +9,7 @@ import { UsersRepository } from 'src/users/repository/users.repository';
 import { UsersAddressRepository } from 'src/users/repository/users-address.repository';
 import { PasswordService } from 'src/core/services/password.service';
 import { FileService } from 'src/file/services/file.service';
+import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 
 @Injectable()
 export class UsersService {
@@ -47,8 +48,8 @@ export class UsersService {
     return this.usersRepository.findAll();
   }
 
-  getAllOngs() {
-    return this.usersRepository.findAllOngs();
+  getAllOngs(pageOptionsDto: PageOptionsDto) {
+    return this.usersRepository.findAllOngs(pageOptionsDto);
   }
 
   async uploadPicture(userId: number, base64Image: string, fileName: string) {

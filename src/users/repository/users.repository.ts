@@ -5,6 +5,9 @@ import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserType } from '../enum/user-type.enum';
+import { PageOptionsDto } from 'src/core/dto/page-options.dto';
+import { PageMetaDto } from 'src/core/dto/page-meta.dto';
+import { PageDto } from 'src/core/dto/page.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -30,13 +33,23 @@ export class UsersRepository {
     return this.userRepository.find();
   }
 
-  findAllOngs() {
-    return this.userRepository.find({
-      where: {
-        type: UserType.ONG,
-      },
-      relations: ['animal', 'userAddress', 'picture', 'animal.files'],
-    });
+  async findAllOngs(pageOptionsDto: PageOptionsDto) {
+    const query = this.userRepository.createQueryBuilder('user');
+
+    query
+      .leftJoinAndSelect('user.animal', 'animal')
+      .leftJoinAndSelect('user.userAddress', 'userAddress')
+      .leftJoinAndSelect('user.picture', 'picture')
+      .leftJoinAndSelect('animal.files', 'files')
+      .where('user.type = :type', { type: UserType.ONG })
+      .orderBy('user.id');
+
+    const itemCount = await query.getCount();
+    const { entities } = await query.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+
+    return new PageDto(entities, pageMetaDto);
   }
 
   findOne(id: number) {

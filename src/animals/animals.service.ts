@@ -9,6 +9,7 @@ import { AnimalRepository } from 'src/animals/repository/animal.repository';
 import { FileService } from 'src/file/services/file.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 
 @Injectable()
 export class AnimalsService {
@@ -27,8 +28,8 @@ export class AnimalsService {
     return { ...animal };
   }
 
-  findAll() {
-    return this.animalRepository.findAll();
+  findAll(pageOptionsDto: PageOptionsDto) {
+    return this.animalRepository.findAll(pageOptionsDto);
   }
 
   findOne(id: number) {
@@ -116,8 +117,8 @@ export class AnimalsService {
     return updatedAnimal;
   }
 
-  async findByUser(userId: number) {
+  async findByUser(userId: number, pageOptionsDto: PageOptionsDto) {
     const user = await this.userService.findOne(userId);
-    return this.animalRepository.findByUser(user);
+    return this.animalRepository.findByUser(user, pageOptionsDto);
   }
 }

@@ -13,6 +13,7 @@ import {
   ParseFilePipe,
   FileTypeValidator,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,6 +23,7 @@ import { StatusCodes } from 'http-status-codes';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from 'src/core/decorator/public.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 
 @Controller('users')
 export class UsersController {
@@ -73,8 +75,8 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get('ongs')
-  findAllOngs() {
-    return this.usersService.getAllOngs();
+  findAllOngs(@Query() pageOptionsDto: PageOptionsDto) {
+    return this.usersService.getAllOngs(pageOptionsDto);
   }
 
   @UseGuards(AuthGuard)
