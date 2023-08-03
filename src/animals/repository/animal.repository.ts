@@ -18,7 +18,6 @@ export class AnimalRepository {
     const animal_ = await this.animalRepository.save(animal);
     return animal_;
   }
-  userRepository;
 
   findAll() {
     return this.animalRepository.find({

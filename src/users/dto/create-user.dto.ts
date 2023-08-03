@@ -7,9 +7,7 @@ import {
   IsEmail,
   IsString,
   IsEnum,
-  IsDate,
   IsDateString,
-  isEnum,
   IsArray,
 } from 'class-validator';
 import {

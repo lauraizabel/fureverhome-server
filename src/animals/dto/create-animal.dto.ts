@@ -22,7 +22,7 @@ export class CreateAnimalDto {
   color: CommonColors;
 
   @IsString()
-  @MaxLength(255)
+  @MaxLength(1024)
   @IsNotEmpty()
   description: string;
 

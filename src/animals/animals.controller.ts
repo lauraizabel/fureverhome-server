@@ -11,12 +11,14 @@ import {
   UseInterceptors,
   UploadedFiles,
   UseGuards,
+  UploadedFile,
 } from '@nestjs/common';
 import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { isArray } from 'class-validator';
 
 @Controller('animals')
 export class AnimalsController {
@@ -52,24 +54,31 @@ export class AnimalsController {
 
   @UseGuards(AuthGuard)
   @Post(':id/files')
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FileInterceptor('file'))
   uploadImage(
     @Param('id') id: string,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
+    console.log(file, req.body);
     const user = req.user;
-    console.log({ req });
+
     if (!user) {
       throw new BadRequestException('Missing user');
     }
 
-    const files_ = files.map(({ filename, buffer, originalname }) => ({
-      fileName: filename || originalname,
-      base64Image: buffer.toString('base64'),
-    }));
+    const newFile = file
+      ? file.buffer.toString('base64')
+      : req.body.file.base64;
 
-    return this.animalsService.uploadPicture(+id, files_);
+    const newName = file ? file.originalname : req.body.file.name;
+
+    const obj = {
+      base64Image: newFile,
+      fileName: newName,
+    };
+
+    return this.animalsService.uploadPicture(+id, obj);
   }
 
   @UseGuards(AuthGuard)
@@ -125,7 +134,7 @@ export class AnimalsController {
       throw new BadRequestException('Missing user');
     }
 
-    return this.animalsService.update(+id, updateAnimalDto, user.id);
+    return this.animalsService.update(+id, updateAnimalDto, user.sub);
   }
 
   @UseGuards(AuthGuard)
@@ -137,6 +146,6 @@ export class AnimalsController {
       throw new BadRequestException('Missing user');
     }
 
-    return this.animalsService.remove(+id, user.id);
+    return this.animalsService.remove(+id, user.sub);
   }
 }

@@ -35,13 +35,14 @@ export class UsersRepository {
       where: {
         type: UserType.ONG,
       },
-      relations: ['animal', 'userAddress', 'picture'],
+      relations: ['animal', 'userAddress', 'picture', 'animal.files'],
     });
   }
 
   findOne(id: number) {
     return this.userRepository.findOne({
       where: { id },
+      relations: ['animal', 'userAddress', 'picture', 'animal.files'],
     });
   }
 

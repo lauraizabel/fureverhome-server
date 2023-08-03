@@ -58,6 +58,14 @@ export class AnimalsService {
       throw new BadRequestException('Current user is not the animal owner');
     }
 
+    if (currentAnimal?.files) {
+      const deletedImages = currentAnimal.files?.map(({ fileId }) =>
+        this.fileService.deleteFile(fileId),
+      );
+
+      await Promise.all(deletedImages);
+    }
+
     return this.animalRepository.remove(id);
   }
 
@@ -66,28 +74,24 @@ export class AnimalsService {
     files: {
       base64Image: string;
       fileName: string;
-    }[],
+    },
   ) {
     const animal = await this.findOne(animalId);
-    const filesError = [];
-
-    const promiseFiles = files.map(async ({ base64Image, fileName }) => {
-      const result = await this.fileService.uploadFile({
-        base64Image,
-        fileName,
-        id: animalId,
-        type: 'animal',
-      });
-      return result;
+    const { fileName, base64Image } = files;
+    const result = await this.fileService.uploadFile({
+      base64Image,
+      fileName,
+      id: animalId,
+      type: 'animal',
     });
 
-    const files_ = await Promise.all(promiseFiles);
+    const animalFiles = animal.files || [];
 
-    animal.files = files_;
+    animal.files = [...animalFiles, result];
 
     const updatedAnimal = await this.animalRepository.update(animalId, animal);
 
-    return { ...updatedAnimal, filesError };
+    return { ...updatedAnimal };
   }
 
   async deletePicture(animalId: number, fileId: string) {
