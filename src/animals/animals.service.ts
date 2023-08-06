@@ -10,6 +10,7 @@ import { FileService } from 'src/file/services/file.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
+import { QueryInterface } from 'src/core/interfaces/query.interface';
 
 @Injectable()
 export class AnimalsService {
@@ -28,8 +29,8 @@ export class AnimalsService {
     return { ...animal };
   }
 
-  findAll(pageOptionsDto: PageOptionsDto) {
-    return this.animalRepository.findAll(pageOptionsDto);
+  findAll(query: QueryInterface) {
+    return this.animalRepository.findAll(query);
   }
 
   findOne(id: number) {

@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import { AnimalSize } from '../enum/animal-size.enum';
 import { AnimalCastrated } from '../enum/animal-castrated.enum';
+import { AnimalSex } from 'src/animals/enum/animal-sex.enum';
 
 @Entity()
 export class Animal {
@@ -40,6 +41,12 @@ export class Animal {
 
   @Column()
   castrated: AnimalCastrated;
+
+  @Column()
+  age: number;
+
+  @Column()
+  sex: AnimalSex;
 
   @ManyToOne(() => User, (user) => user.animal)
   user: User;

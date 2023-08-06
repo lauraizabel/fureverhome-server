@@ -103,4 +103,18 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.delete(+id);
   }
+
+  @UseGuards(AuthGuard)
+  @Put(':id/change-password')
+  async changePassword(
+    @Param('id') id: string,
+    @Body('password') password: string,
+    @Body('passwordConfirmation') passwordConfirmation: string,
+    @Body('oldPassword') oldPassword: string,
+  ) {
+    if (password !== passwordConfirmation) {
+      throw new BadRequestException('Passwords do not match');
+    }
+    return this.usersService.changePassword(+id, oldPassword, password);
+  }
 }

@@ -143,4 +143,24 @@ export class UsersService {
 
     return this.usersRepository.remove(id);
   }
+
+  async changePassword(id: number, oldPassword: string, password: string) {
+    const user = await this.usersRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    const correctOldPassword = this.passwordService.comparePassword(
+      oldPassword,
+      user.password,
+    );
+
+    if (!correctOldPassword) {
+      throw new NotFoundException('Incorrect Password');
+    }
+
+    user.password = await this.passwordService.hashPassword(password);
+
+    return this.usersRepository.update(id, user);
+  }
 }

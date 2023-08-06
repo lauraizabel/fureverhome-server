@@ -1,5 +1,6 @@
 import {
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,6 +12,7 @@ import { AnimalDewormed } from 'src/animals/enum/animal-dewormed.enum';
 import { User } from 'src/users/entities/user.entity';
 import { AnimalSize } from '../enum/animal-size.enum';
 import { AnimalCastrated } from '../enum/animal-castrated.enum';
+import { AnimalSex } from 'src/animals/enum/animal-sex.enum';
 
 export class CreateAnimalDto {
   @IsEnum(AnimalType)
@@ -42,6 +44,14 @@ export class CreateAnimalDto {
   @IsEnum(AnimalCastrated)
   @IsNotEmpty()
   castrated: AnimalCastrated;
+
+  @IsEnum(AnimalSex)
+  @IsNotEmpty()
+  sex: AnimalSex;
+
+  @IsNotEmpty()
+  @IsInt()
+  age: number;
 
   @IsOptional()
   user?: User;

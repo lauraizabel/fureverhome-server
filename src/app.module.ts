@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from 'src/core/config/jwt.config';
 import { AnimalsModule } from './animals/animals.module';
 import { FileModule } from './file/file.module';
+import { ChatGateway } from 'src/chat/chat.gateway';
 @Module({
   imports: [
     TypeOrmModule.forRoot({ ...databaseConfig }),
@@ -19,6 +20,6 @@ import { FileModule } from './file/file.module';
     AnimalsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule {}

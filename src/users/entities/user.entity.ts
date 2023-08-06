@@ -13,7 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AnimalType } from '../../animals/enum/animal-type.enum';
-import { Exclude } from 'class-transformer';
+import { Message } from 'src/chat/entity/message.entity';
 
 @Entity()
 export class User {
@@ -65,6 +65,12 @@ export class User {
 
   @OneToMany(() => Animal, (animal) => animal.user)
   animal: Animal[];
+
+  @OneToMany(() => Message, (message) => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, (message) => message.receiver)
+  receivedMessages: Message[];
 
   @UpdateDateColumn()
   updatedAt: Date;

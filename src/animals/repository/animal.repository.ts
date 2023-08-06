@@ -6,6 +6,7 @@ import { Animal } from 'src/animals/entities/animal.entity';
 import { PageMetaDto } from 'src/core/dto/page-meta.dto';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { PageDto } from 'src/core/dto/page.dto';
+import { QueryInterface } from 'src/core/interfaces/query.interface';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -22,21 +23,45 @@ export class AnimalRepository {
     return animal_;
   }
 
-  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Animal>> {
+  async findAll(query: QueryInterface): Promise<PageDto<Animal>> {
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
+
+    if (query.minAge) {
+      queryBuilder.andWhere('animal.age >= :minAge', {
+        minAge: query.minAge,
+      });
+    }
+
+    if (query.maxAge) {
+      queryBuilder.andWhere('animal.age <= :maxAge', {
+        maxAge: query.maxAge,
+      });
+    }
+
+    if (query.size) {
+      queryBuilder.andWhere('animal.size = :size', {
+        size: query.size,
+      });
+    }
+
+    if (query.sex) {
+      queryBuilder.andWhere('animal.sex = :sex', {
+        sex: query.sex,
+      });
+    }
 
     queryBuilder
       .leftJoinAndSelect('animal.user', 'user')
       .leftJoinAndSelect('animal.files', 'files')
       .orderBy('animal.id')
-      .skip(pageOptionsDto.skip)
-      .take(pageOptionsDto.take);
+      .skip(query.skip)
+      .take(query.take);
 
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
 
     const pageMetaDto = new PageMetaDto({
-      pageOptionsDto,
+      pageOptionsDto: query,
       itemCount,
     });
 

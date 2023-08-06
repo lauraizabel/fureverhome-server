@@ -3,24 +3,24 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Request,
   BadRequestException,
   UseInterceptors,
-  UploadedFiles,
   UseGuards,
   UploadedFile,
   Query,
+  Put,
 } from '@nestjs/common';
 import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { isArray } from 'class-validator';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
+import { AnimalOptionDto } from 'src/core/dto/animal-options.dto';
+import { QueryInterface } from 'src/core/interfaces/query.interface';
 
 @Controller('animals')
 export class AnimalsController {
@@ -101,8 +101,7 @@ export class AnimalsController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll(@Query() pageOptionsDto: PageOptionsDto) {
-    console.log(pageOptionsDto);
+  findAll(@Query() pageOptionsDto: QueryInterface) {
     return this.animalsService.findAll(pageOptionsDto);
   }
 
@@ -129,7 +128,7 @@ export class AnimalsController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateAnimalDto: UpdateAnimalDto,
