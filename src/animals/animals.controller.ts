@@ -62,7 +62,6 @@ export class AnimalsController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
-    console.log(file, req.body);
     const user = req.user;
 
     if (!user) {
@@ -101,8 +100,16 @@ export class AnimalsController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll(@Query() pageOptionsDto: QueryInterface) {
-    return this.animalsService.findAll(pageOptionsDto);
+  findAll(@Query() pageOptionsDto: QueryInterface, @Request() req) {
+    const user = req.user;
+
+    if (!user) {
+      throw new BadRequestException('Missing user');
+    }
+
+    const userId = user ? user.sub : null;
+
+    return this.animalsService.findAll(pageOptionsDto, +userId);
   }
 
   @UseGuards(AuthGuard)

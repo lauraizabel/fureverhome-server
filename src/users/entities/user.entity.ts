@@ -51,7 +51,7 @@ export class User {
   animalTypes: AnimalType[];
 
   @JoinColumn()
-  @OneToOne(() => File, (file) => file.user)
+  @OneToOne(() => File, (file) => file.user, { nullable: true })
   picture?: File;
 
   @Column()

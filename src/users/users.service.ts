@@ -10,6 +10,7 @@ import { UsersAddressRepository } from 'src/users/repository/users-address.repos
 import { PasswordService } from 'src/core/services/password.service';
 import { FileService } from 'src/file/services/file.service';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
+import { AddressService } from 'src/address/address.service';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,7 @@ export class UsersService {
     private readonly usersAddressRepository: UsersAddressRepository,
     private readonly passwordService: PasswordService,
     private readonly fileService: FileService,
+    private readonly addressService: AddressService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -34,9 +36,15 @@ export class UsersService {
     );
 
     const user = await this.usersRepository.create(createUserDto);
+
+    const positions = await this.addressService.getCoordinatesByAddress(
+      `${createUserDto.street}, ${createUserDto.number}, ${createUserDto.city} - ${createUserDto.state}`,
+    );
     const address = await this.usersAddressRepository.create({
       ...createUserDto,
       user,
+      latitude: positions.lat,
+      longitude: positions.lng,
     });
 
     const { password, ...rest } = user;
@@ -48,8 +56,8 @@ export class UsersService {
     return this.usersRepository.findAll();
   }
 
-  getAllOngs(pageOptionsDto: PageOptionsDto) {
-    return this.usersRepository.findAllOngs(pageOptionsDto);
+  getAllOngs(pageOptionsDto: PageOptionsDto, userId: number) {
+    return this.usersRepository.findAllOngs(pageOptionsDto, userId);
   }
 
   async uploadPicture(userId: number, base64Image: string, fileName: string) {
@@ -63,7 +71,6 @@ export class UsersService {
     });
 
     user.picture = result;
-    console.log(user);
     try {
       const updatedUser = await this.usersRepository.update(user.id, user);
       return updatedUser;

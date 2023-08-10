@@ -19,16 +19,25 @@ export class UsersAddressRepository {
     number,
     neighborhood,
     user,
-  }: CreateUserDto & { user: User }) {
+    city,
+    latitude,
+    longitude,
+  }: CreateUserDto & { user: User } & {
+    latitude?: number;
+    longitude?: number;
+  }) {
     const address = this.userAddressRepository.create({
       state,
       street,
       number,
       neighborhood,
       user,
+      latitude,
+      longitude,
+      city,
     });
-    const addres_ = await this.userAddressRepository.save(address);
-    return addres_;
+    const savedAddress = await this.userAddressRepository.save(address);
+    return savedAddress;
   }
 
   findOne(id: number) {

@@ -6,6 +6,7 @@ import { Animal } from 'src/animals/entities/animal.entity';
 import { PageMetaDto } from 'src/core/dto/page-meta.dto';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { PageDto } from 'src/core/dto/page.dto';
+import { calculateHaversineDistance } from 'src/core/helpers/haversine';
 import { QueryInterface } from 'src/core/interfaces/query.interface';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -23,7 +24,7 @@ export class AnimalRepository {
     return animal_;
   }
 
-  async findAll(query: QueryInterface): Promise<PageDto<Animal>> {
+  async findAll(query: QueryInterface, user: User): Promise<PageDto<Animal>> {
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
 
     if (query.minAge) {
@@ -53,9 +54,26 @@ export class AnimalRepository {
     queryBuilder
       .leftJoinAndSelect('animal.user', 'user')
       .leftJoinAndSelect('animal.files', 'files')
-      .orderBy('animal.id')
       .skip(query.skip)
       .take(query.take);
+
+    if (query.radius && user) {
+      const userLatitude = user.userAddress.latitude;
+      const userLongitude = user.userAddress.longitude;
+      queryBuilder
+        .orderBy(
+          `(6371 * acos(
+          cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
+          * cos(radians(userAddress.longitude) - radians(:userLongitude))
+          + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
+        ))`,
+          'ASC',
+        )
+        .setParameter('userLatitude', userLatitude)
+        .setParameter('userLongitude', userLongitude)
+        .setParameter('maxDistance', query.radius)
+        .getMany();
+    }
 
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
@@ -65,7 +83,21 @@ export class AnimalRepository {
       itemCount,
     });
 
-    return new PageDto(entities, pageMetaDto);
+    const animals = entities.map((entity) => {
+      const distance = calculateHaversineDistance(
+        user.userAddress.latitude,
+        user.userAddress.longitude,
+        entity.user.userAddress.latitude,
+        entity.user.userAddress.longitude,
+      );
+
+      return {
+        ...entity,
+        distance: distance.toFixed(2),
+      };
+    });
+
+    return new PageDto(animals, pageMetaDto);
   }
 
   findOne(id: number) {

@@ -29,8 +29,9 @@ export class AnimalsService {
     return { ...animal };
   }
 
-  findAll(query: QueryInterface) {
-    return this.animalRepository.findAll(query);
+  async findAll(query: QueryInterface, userId: number) {
+    const user = await this.userService.findOne(userId);
+    return this.animalRepository.findAll(query, user);
   }
 
   findOne(id: number) {

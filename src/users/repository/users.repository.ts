@@ -8,6 +8,7 @@ import { UserType } from '../enum/user-type.enum';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { PageMetaDto } from 'src/core/dto/page-meta.dto';
 import { PageDto } from 'src/core/dto/page.dto';
+import { calculateHaversineDistance } from 'src/core/helpers/haversine';
 
 @Injectable()
 export class UsersRepository {
@@ -33,23 +34,63 @@ export class UsersRepository {
     return this.userRepository.find();
   }
 
-  async findAllOngs(pageOptionsDto: PageOptionsDto) {
-    const query = this.userRepository.createQueryBuilder('user');
+  async findAllOngs(pageOptionsDto: PageOptionsDto, userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['userAddress'],
+    });
 
-    query
+    if (!user) {
+      return null;
+    }
+
+    const { skip, take } = pageOptionsDto;
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
       .leftJoinAndSelect('user.animal', 'animal')
       .leftJoinAndSelect('user.userAddress', 'userAddress')
       .leftJoinAndSelect('user.picture', 'picture')
       .leftJoinAndSelect('animal.files', 'files')
       .where('user.type = :type', { type: UserType.ONG })
-      .orderBy('user.id');
+      .andWhere(
+        `(6371 * acos(
+          cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
+          * cos(radians(userAddress.longitude) - radians(:userLongitude))
+          + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
+        )) <= :maxDistance`,
+        {
+          userLatitude: user.userAddress.latitude,
+          userLongitude: user.userAddress.longitude,
+          maxDistance: 10,
+        },
+      )
+      .orderBy('user.id')
+      .skip(skip)
+      .take(take);
 
-    const itemCount = await query.getCount();
-    const { entities } = await query.getRawAndEntities();
+    const [users, itemCount] = await queryBuilder.getManyAndCount();
 
-    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    const formattedUsers = users.map((selectedUser) => {
+      const distance = calculateHaversineDistance(
+        selectedUser.userAddress.latitude,
+        selectedUser.userAddress.longitude,
+        user.userAddress.latitude,
+        user.userAddress.longitude,
+      );
 
-    return new PageDto(entities, pageMetaDto);
+      return {
+        ...selectedUser,
+        distance: distance.toFixed(2),
+      };
+    });
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto,
+    });
+
+    return new PageDto(formattedUsers, pageMetaDto);
   }
 
   findOne(id: number) {

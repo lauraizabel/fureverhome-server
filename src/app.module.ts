@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -10,6 +10,8 @@ import { jwtConfig } from 'src/core/config/jwt.config';
 import { AnimalsModule } from './animals/animals.module';
 import { FileModule } from './file/file.module';
 import { ChatGateway } from 'src/chat/chat.gateway';
+import { AddressService } from './address/address.service';
+import { RequestLoggingMiddleware } from 'src/core/middlewares/ request-logging.middleware';
 @Module({
   imports: [
     TypeOrmModule.forRoot({ ...databaseConfig }),
@@ -20,6 +22,10 @@ import { ChatGateway } from 'src/chat/chat.gateway';
     AnimalsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [AppService, ChatGateway, AddressService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggingMiddleware).forRoutes('*');
+  }
+}

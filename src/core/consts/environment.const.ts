@@ -14,4 +14,7 @@ export const environment = {
     privateKey: process.env.IMAGE_PRIVATE_KEY || 'key',
     urlEndpoint: process.env.IMAGE_URL_ENDPOINT || 'url',
   },
+  here: {
+    apiKey: process.env.HERE_API_KEY,
+  },
 };

@@ -10,10 +10,17 @@ import { UserAddress } from 'src/users/entities/user-address.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AnimalsModule } from 'src/animals/animals.module';
 import { FileModule } from 'src/file/file.module';
+import { AddressService } from 'src/address/address.service';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository, UsersAddressRepository, AuthGuard],
+  providers: [
+    UsersService,
+    AddressService,
+    UsersRepository,
+    UsersAddressRepository,
+    AuthGuard,
+  ],
   imports: [
     TypeOrmModule.forFeature([User, UserAddress]),
     CommonModule,

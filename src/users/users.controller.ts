@@ -14,6 +14,7 @@ import {
   FileTypeValidator,
   UseGuards,
   Query,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -51,10 +52,10 @@ export class UsersController {
         validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
       }),
     )
-    file: Express.Multer.File,
+    picture: Express.Multer.File,
   ) {
-    const buffer = file.buffer.toString('base64');
-    const fileName = file.filename || file.originalname;
+    const buffer = picture.buffer.toString('base64');
+    const fileName = picture.filename || picture.originalname;
     return this.usersService.uploadPicture(+id, buffer, fileName);
   }
 
@@ -75,8 +76,13 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get('ongs')
-  findAllOngs(@Query() pageOptionsDto: PageOptionsDto) {
-    return this.usersService.getAllOngs(pageOptionsDto);
+  findAllOngs(@Query() pageOptionsDto: PageOptionsDto, @Request() req) {
+    const user = req.user;
+    if (!user) {
+      throw new BadRequestException('Missing user');
+    }
+    const userId = user.sub;
+    return this.usersService.getAllOngs(pageOptionsDto, +userId);
   }
 
   @UseGuards(AuthGuard)
@@ -108,13 +114,13 @@ export class UsersController {
   @Put(':id/change-password')
   async changePassword(
     @Param('id') id: string,
-    @Body('password') password: string,
-    @Body('passwordConfirmation') passwordConfirmation: string,
-    @Body('oldPassword') oldPassword: string,
+    @Body('newPassword') newPassword: string,
+    @Body('newPasswordConfirmation') newPasswordConfirmation: string,
+    @Body('currentPassword') currentPassword: string,
   ) {
-    if (password !== passwordConfirmation) {
+    if (newPassword !== newPasswordConfirmation) {
       throw new BadRequestException('Passwords do not match');
     }
-    return this.usersService.changePassword(+id, oldPassword, password);
+    return this.usersService.changePassword(+id, currentPassword, newPassword);
   }
 }

@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Animal } from 'src/animals/entities/animal.entity';
 import { AnimalRepository } from 'src/animals/repository/animal.repository';
 import { FileModule } from 'src/file/file.module';
+import { AddressService } from 'src/address/address.service';
 
 @Module({
   controllers: [AnimalsController],
@@ -17,7 +18,7 @@ import { FileModule } from 'src/file/file.module';
     CommonModule,
     TypeOrmModule.forFeature([Animal]),
   ],
-  providers: [AnimalsService, AuthGuard, AnimalRepository],
+  providers: [AnimalsService, AuthGuard, AnimalRepository, AddressService],
   exports: [AnimalsService, AnimalRepository],
 })
 export class AnimalsModule {}

@@ -25,10 +25,19 @@ export class UserAddress {
   state: string;
 
   @Column()
+  city: string;
+
+  @Column()
   neighborhood: string;
 
   @Column({ nullable: true })
   number?: string;
+
+  @Column('decimal', { precision: 10, scale: 8, nullable: true })
+  latitude?: number;
+
+  @Column('decimal', { precision: 11, scale: 8, nullable: true })
+  longitude?: number;
 
   @UpdateDateColumn()
   updatedAt: Date;
