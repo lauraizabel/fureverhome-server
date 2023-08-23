@@ -52,20 +52,28 @@ export class UsersRepository {
       .leftJoinAndSelect('user.userAddress', 'userAddress')
       .leftJoinAndSelect('user.picture', 'picture')
       .leftJoinAndSelect('animal.files', 'files')
+      .addSelect([
+        'user',
+        `(6371 * acos(
+        cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
+        * cos(radians(userAddress.longitude) - radians(:userLongitude))
+        + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
+      )) AS distance`,
+      ])
       .where('user.type = :type', { type: UserType.ONG })
+      .andWhere('user.id != :userId', { userId })
       .andWhere(
         `(6371 * acos(
-          cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
-          * cos(radians(userAddress.longitude) - radians(:userLongitude))
-          + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
-        )) <= :maxDistance`,
+        cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
+        * cos(radians(userAddress.longitude) - radians(:userLongitude))
+        + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
+      )) <= :maxDistance`,
         {
           userLatitude: user.userAddress.latitude,
           userLongitude: user.userAddress.longitude,
           maxDistance: 10,
         },
       )
-      .orderBy('user.id')
       .skip(skip)
       .take(take);
 
@@ -81,16 +89,25 @@ export class UsersRepository {
 
       return {
         ...selectedUser,
-        distance: distance.toFixed(2),
+        distance: parseFloat(distance.toFixed(2)),
       };
     });
+
+    const sortedUsers = formattedUsers.sort((a, b) => {
+      return a.distance - b.distance;
+    });
+
+    const sortedUsersWithStringDistance = sortedUsers.map((user) => ({
+      ...user,
+      distance: user.distance.toString(),
+    }));
 
     const pageMetaDto = new PageMetaDto({
       itemCount,
       pageOptionsDto,
     });
 
-    return new PageDto(formattedUsers, pageMetaDto);
+    return new PageDto(sortedUsersWithStringDistance, pageMetaDto);
   }
 
   findOne(id: number) {

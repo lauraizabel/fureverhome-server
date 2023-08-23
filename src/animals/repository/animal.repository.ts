@@ -27,6 +27,12 @@ export class AnimalRepository {
   async findAll(query: QueryInterface, user: User): Promise<PageDto<Animal>> {
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
 
+    if (query.type) {
+      queryBuilder.andWhere('animal.type = :type', {
+        type: query.type,
+      });
+    }
+
     if (query.minAge) {
       queryBuilder.andWhere('animal.age >= :minAge', {
         minAge: query.minAge,
@@ -51,12 +57,6 @@ export class AnimalRepository {
       });
     }
 
-    queryBuilder
-      .leftJoinAndSelect('animal.user', 'user')
-      .leftJoinAndSelect('animal.files', 'files')
-      .skip(query.skip)
-      .take(query.take);
-
     if (query.radius && user) {
       const userLatitude = user.userAddress.latitude;
       const userLongitude = user.userAddress.longitude;
@@ -75,6 +75,13 @@ export class AnimalRepository {
         .getMany();
     }
 
+    queryBuilder
+      .leftJoinAndSelect('animal.user', 'user')
+      .leftJoinAndSelect('user.userAddress', 'userAddress')
+      .leftJoinAndSelect('animal.files', 'files')
+      .skip(query.skip)
+      .take(query.take);
+
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
 
@@ -84,6 +91,7 @@ export class AnimalRepository {
     });
 
     const animals = entities.map((entity) => {
+      console.log(entity.user);
       const distance = calculateHaversineDistance(
         user.userAddress.latitude,
         user.userAddress.longitude,

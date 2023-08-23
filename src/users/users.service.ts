@@ -75,7 +75,6 @@ export class UsersService {
       const updatedUser = await this.usersRepository.update(user.id, user);
       return updatedUser;
     } catch (e) {
-      console.log({ e });
       throw new BadRequestException(e);
     }
   }

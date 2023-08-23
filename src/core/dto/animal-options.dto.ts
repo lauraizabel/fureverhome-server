@@ -1,6 +1,7 @@
 import { IsEnum, IsInt, IsNumber, IsOptional, Min } from 'class-validator';
 import { AnimalSex } from 'src/animals/enum/animal-sex.enum';
 import { AnimalSize } from 'src/animals/enum/animal-size.enum';
+import { AnimalType } from 'src/animals/enum/animal-type.enum';
 
 export class AnimalOptionDto {
   @IsEnum(AnimalSize)
@@ -23,4 +24,8 @@ export class AnimalOptionDto {
   @IsOptional()
   @IsNumber()
   readonly radius?: number = undefined;
+
+  @IsEnum(AnimalType)
+  @IsOptional()
+  readonly type?: AnimalType = undefined;
 }
