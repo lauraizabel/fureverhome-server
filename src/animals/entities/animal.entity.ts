@@ -15,6 +15,7 @@ import {
 import { AnimalSize } from '../enum/animal-size.enum';
 import { AnimalCastrated } from '../enum/animal-castrated.enum';
 import { AnimalSex } from 'src/animals/enum/animal-sex.enum';
+import { AnimalAge } from 'src/animals/enum/animal-age.enum';
 
 @Entity()
 export class Animal {
@@ -43,7 +44,7 @@ export class Animal {
   castrated: AnimalCastrated;
 
   @Column()
-  age: number;
+  age: AnimalAge;
 
   @Column()
   sex: AnimalSex;

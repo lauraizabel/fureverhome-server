@@ -19,7 +19,6 @@ import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
-import { AnimalOptionDto } from 'src/core/dto/animal-options.dto';
 import { QueryInterface } from 'src/core/interfaces/query.interface';
 
 @Controller('animals')
@@ -100,7 +99,7 @@ export class AnimalsController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll(@Query() pageOptionsDto: QueryInterface, @Request() req) {
+  findAll(@Query() query: QueryInterface, @Request() req) {
     const user = req.user;
 
     if (!user) {
@@ -109,7 +108,7 @@ export class AnimalsController {
 
     const userId = user ? user.sub : null;
 
-    return this.animalsService.findAll(pageOptionsDto, +userId);
+    return this.animalsService.findAll(query, +userId);
   }
 
   @UseGuards(AuthGuard)

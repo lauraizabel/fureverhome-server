@@ -44,12 +44,26 @@ export class UsersAddressRepository {
     return this.userAddressRepository.findOneBy({ id });
   }
 
-  update(id: number, { state, street, number, neighborhood }: UpdateUserDto) {
+  update(
+    id: number,
+    {
+      state,
+      street,
+      number,
+      neighborhood,
+      city,
+      latitude,
+      longitude,
+    }: UpdateUserDto,
+  ) {
     return this.userAddressRepository.update(id, {
       state,
       street,
       number,
       neighborhood,
+      latitude,
+      longitude,
+      city,
     });
   }
 }

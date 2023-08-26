@@ -47,16 +47,17 @@ export class UsersController {
   @UseGuards(AuthGuard)
   async uploadPicture(
     @Param('id') id: string,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
-      }),
-    )
+    @UploadedFile()
     picture: Express.Multer.File,
+    @Request() req,
   ) {
-    const buffer = picture.buffer.toString('base64');
-    const fileName = picture.filename || picture.originalname;
-    return this.usersService.uploadPicture(+id, buffer, fileName);
+    const newFile = picture
+      ? picture.buffer.toString('base64')
+      : req.body.file.base64;
+
+    const newName = picture ? picture.originalname : req.body.file.name;
+
+    return this.usersService.uploadPicture(+id, newFile, newName);
   }
 
   @Delete(':id/image/:imageId')

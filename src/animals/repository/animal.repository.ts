@@ -24,8 +24,32 @@ export class AnimalRepository {
     return animal_;
   }
 
-  async findAll(query: QueryInterface, user: User): Promise<PageDto<Animal>> {
+  async findAll(query: QueryInterface, user: User) {
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
+
+    if (query.radius && user) {
+      const userLatitude = user.userAddress.latitude;
+      const userLongitude = user.userAddress.longitude;
+      queryBuilder
+        .orderBy(
+          `(6371 * acos(
+          cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
+          * cos(radians(userAddress.longitude) - radians(:userLongitude))
+          + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
+        ))`,
+          'ASC',
+        )
+        .setParameter('userLatitude', userLatitude)
+        .setParameter('userLongitude', userLongitude)
+        .setParameter('maxDistance', query.radius)
+        .getMany();
+    }
+
+    queryBuilder
+      .andWhere('user.id != :userId', { userId: user.id })
+      .leftJoinAndSelect('animal.user', 'user')
+      .leftJoinAndSelect('user.userAddress', 'userAddress')
+      .leftJoinAndSelect('animal.files', 'files');
 
     if (query.type) {
       queryBuilder.andWhere('animal.type = :type', {
@@ -57,31 +81,6 @@ export class AnimalRepository {
       });
     }
 
-    if (query.radius && user) {
-      const userLatitude = user.userAddress.latitude;
-      const userLongitude = user.userAddress.longitude;
-      queryBuilder
-        .orderBy(
-          `(6371 * acos(
-          cos(radians(:userLatitude)) * cos(radians(userAddress.latitude))
-          * cos(radians(userAddress.longitude) - radians(:userLongitude))
-          + sin(radians(:userLatitude)) * sin(radians(userAddress.latitude))
-        ))`,
-          'ASC',
-        )
-        .setParameter('userLatitude', userLatitude)
-        .setParameter('userLongitude', userLongitude)
-        .setParameter('maxDistance', query.radius)
-        .getMany();
-    }
-
-    queryBuilder
-      .leftJoinAndSelect('animal.user', 'user')
-      .leftJoinAndSelect('user.userAddress', 'userAddress')
-      .leftJoinAndSelect('animal.files', 'files')
-      .skip(query.skip)
-      .take(query.take);
-
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
 
@@ -91,7 +90,7 @@ export class AnimalRepository {
     });
 
     const animals = entities.map((entity) => {
-      console.log(entity.user);
+      if (!entity.user.userAddress) return entity;
       const distance = calculateHaversineDistance(
         user.userAddress.latitude,
         user.userAddress.longitude,
@@ -105,7 +104,7 @@ export class AnimalRepository {
       };
     });
 
-    return new PageDto(animals, pageMetaDto);
+    return animals;
   }
 
   findOne(id: number) {
@@ -115,15 +114,20 @@ export class AnimalRepository {
     });
   }
 
-  update(id: number, updateUserDto: UpdateAnimalDto) {
-    return this.animalRepository.save(updateUserDto);
+  async update(id: number, updateAnimalDto: UpdateAnimalDto) {
+    const animalToBeUpdated = {
+      ...updateAnimalDto,
+      id,
+    };
+    const animal = await this.animalRepository.save(animalToBeUpdated);
+    return animal;
   }
 
   remove(id: number) {
     return this.animalRepository.delete({ id });
   }
 
-  async findByUser(user: User, pageOptionsDto: PageOptionsDto) {
+  async findByUser(user: User, query: QueryInterface) {
     const { id } = user;
 
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
@@ -132,18 +136,41 @@ export class AnimalRepository {
       .leftJoinAndSelect('animal.user', 'user')
       .leftJoinAndSelect('animal.files', 'files')
       .where('user.id = :id', { id })
-      .orderBy('animal.id')
-      .skip(pageOptionsDto.skip)
-      .take(pageOptionsDto.take);
+      .orderBy('animal.id');
+
+    if (query.type) {
+      queryBuilder.andWhere('animal.type = :type', {
+        type: query.type,
+      });
+    }
+
+    if (query.minAge) {
+      queryBuilder.andWhere('animal.age >= :minAge', {
+        minAge: query.minAge,
+      });
+    }
+
+    if (query.maxAge) {
+      queryBuilder.andWhere('animal.age <= :maxAge', {
+        maxAge: query.maxAge,
+      });
+    }
+
+    if (query.size) {
+      queryBuilder.andWhere('animal.size = :size', {
+        size: query.size,
+      });
+    }
+
+    if (query.sex) {
+      queryBuilder.andWhere('animal.sex = :sex', {
+        sex: query.sex,
+      });
+    }
 
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
 
-    const pageMetaDto = new PageMetaDto({
-      pageOptionsDto,
-      itemCount,
-    });
-
-    return new PageDto(entities, pageMetaDto);
+    return entities;
   }
 }

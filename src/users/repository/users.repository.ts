@@ -9,6 +9,7 @@ import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { PageMetaDto } from 'src/core/dto/page-meta.dto';
 import { PageDto } from 'src/core/dto/page.dto';
 import { calculateHaversineDistance } from 'src/core/helpers/haversine';
+import { QueryInterface } from 'src/core/interfaces/query.interface';
 
 @Injectable()
 export class UsersRepository {
@@ -34,7 +35,7 @@ export class UsersRepository {
     return this.userRepository.find();
   }
 
-  async findAllOngs(pageOptionsDto: PageOptionsDto, userId: number) {
+  async findAllOngs(query: QueryInterface, userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['userAddress'],
@@ -44,7 +45,7 @@ export class UsersRepository {
       return null;
     }
 
-    const { skip, take } = pageOptionsDto;
+    const { name, type } = query;
 
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
@@ -73,13 +74,18 @@ export class UsersRepository {
           userLongitude: user.userAddress.longitude,
           maxDistance: 10,
         },
-      )
-      .skip(skip)
-      .take(take);
+      );
 
-    const [users, itemCount] = await queryBuilder.getManyAndCount();
+    if (name) {
+      queryBuilder.andWhere(
+        'user.firstName ILIKE :text OR user.lastName ILIKE :text',
+        { text: `%${name}%` },
+      );
+    }
 
-    const formattedUsers = users.map((selectedUser) => {
+    const [users] = await queryBuilder.getManyAndCount();
+
+    let formattedUsers = users.map((selectedUser) => {
       const distance = calculateHaversineDistance(
         selectedUser.userAddress.latitude,
         selectedUser.userAddress.longitude,
@@ -93,6 +99,12 @@ export class UsersRepository {
       };
     });
 
+    if (type) {
+      formattedUsers = formattedUsers.filter((user) => {
+        return user.animal.some((animal) => animal.type === type);
+      });
+    }
+
     const sortedUsers = formattedUsers.sort((a, b) => {
       return a.distance - b.distance;
     });
@@ -102,12 +114,7 @@ export class UsersRepository {
       distance: user.distance.toString(),
     }));
 
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto,
-    });
-
-    return new PageDto(sortedUsersWithStringDistance, pageMetaDto);
+    return sortedUsersWithStringDistance;
   }
 
   findOne(id: number) {

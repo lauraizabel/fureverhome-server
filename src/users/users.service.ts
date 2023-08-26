@@ -11,6 +11,9 @@ import { PasswordService } from 'src/core/services/password.service';
 import { FileService } from 'src/file/services/file.service';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { AddressService } from 'src/address/address.service';
+import { User } from 'src/users/entities/user.entity';
+import { UserAddress } from 'src/users/entities/user-address.entity';
+import { QueryInterface } from 'src/core/interfaces/query.interface';
 
 @Injectable()
 export class UsersService {
@@ -56,8 +59,8 @@ export class UsersService {
     return this.usersRepository.findAll();
   }
 
-  getAllOngs(pageOptionsDto: PageOptionsDto, userId: number) {
-    return this.usersRepository.findAllOngs(pageOptionsDto, userId);
+  getAllOngs(query: QueryInterface, userId: number) {
+    return this.usersRepository.findAllOngs(query, userId);
   }
 
   async uploadPicture(userId: number, base64Image: string, fileName: string) {
@@ -72,8 +75,8 @@ export class UsersService {
 
     user.picture = result;
     try {
-      const updatedUser = await this.usersRepository.update(user.id, user);
-      return updatedUser;
+      await this.usersRepository.update(user.id, user);
+      return result;
     } catch (e) {
       throw new BadRequestException(e);
     }
@@ -113,31 +116,50 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
+    const userAddress: UserAddress = {
+      street: updateUserDto.street ?? user.userAddress.street,
+      number: updateUserDto.number ?? user.userAddress.number,
+      city: updateUserDto.city ?? user.userAddress.city,
+      state: updateUserDto.state ?? user.userAddress.state,
+      user,
+      id: user.userAddress.id,
+      neighborhood: updateUserDto.neighborhood ?? user.userAddress.neighborhood,
+    } as UserAddress;
 
-    if (
-      updateUserDto.newPassword &&
-      updateUserDto.password &&
-      updateUserDto.confirmPassword
-    ) {
-      const correctOldPassword = this.passwordService.comparePassword(
-        updateUserDto.password,
-        user.password,
-      );
+    const positions = await this.addressService.getCoordinatesByAddress(
+      `${userAddress.street}, ${userAddress.number}, ${userAddress.city} - ${userAddress.state}`,
+    );
 
-      if (!correctOldPassword) {
-        throw new NotFoundException('Incorrect Password');
-      }
+    userAddress.latitude = positions.lat;
+    userAddress.longitude = positions.lng;
 
-      if (updateUserDto.newPassword !== updateUserDto.confirmPassword) {
-        throw new NotFoundException('Passwords does not matches');
-      }
+    await this.usersAddressRepository.update(userAddress.id, userAddress);
 
-      updateUserDto.password = await this.passwordService.hashPassword(
-        updateUserDto.newPassword,
-      );
-    }
+    const userToBeUpdated: User = {
+      firstName: updateUserDto.firstName || user.firstName,
+      lastName: updateUserDto.lastName || user.lastName,
+      email: updateUserDto.email || user.email,
+      password: updateUserDto.password,
+      id: user.id,
+      picture: user.picture,
+      animal: user.animal,
+      cnpj: updateUserDto.cnpj || user.cnpj,
+      cpf: updateUserDto.cpf || user.cpf,
+      description: updateUserDto.description || user.description,
+      phone: updateUserDto.phone || user.phone,
+      type: updateUserDto.type || user.type,
+      dateOfBirth: updateUserDto.dateOfBirth || user.dateOfBirth,
+      receivedMessages: user.receivedMessages,
+      sentMessages: user.sentMessages,
+      job: updateUserDto.job || user.job,
+      animalTypes: updateUserDto.animalTypes || user.animalTypes,
+    } as User;
+    const newUser = await this.usersRepository.update(id, userToBeUpdated);
 
-    return this.usersRepository.update(id, updateUserDto);
+    return {
+      ...newUser,
+      userAddress,
+    };
   }
 
   async delete(id: number) {
