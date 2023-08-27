@@ -14,4 +14,10 @@ export class Message {
 
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   receiver: User;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
 }

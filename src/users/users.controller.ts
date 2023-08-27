@@ -10,8 +10,6 @@ import {
   HttpCode,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
   UseGuards,
   Query,
   Request,
