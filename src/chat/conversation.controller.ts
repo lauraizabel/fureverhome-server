@@ -20,7 +20,7 @@ export class ConversationController {
     @Param('receiverId') receiverId: number,
     @Body('content') content: string,
   ) {
-    const conversation = await this.conversationService.createConversation(
+    const chat = await this.conversationService.createConversation(
       senderId,
       receiverId,
       content,
@@ -30,9 +30,39 @@ export class ConversationController {
       content,
       senderId,
       receiverId,
-      chatId: `${conversation.sender.id}-${conversation.receiver.id}`,
+      chatId: `${chat.id}`,
     });
 
-    return conversation;
+    return chat;
+  }
+
+  @Get('messages/:chatId')
+  async getMessages(@Param('chatId') chatId: number) {
+    return this.conversationService.getMessages(chatId);
+  }
+
+  @Post(':chatId/:senderId/send')
+  async sendMessage(
+    @Param('chatId') chatId: number,
+    @Param('senderId') senderId: number,
+    @Body('content') content: string,
+  ) {
+    const message = await this.conversationService.saveMessage(
+      chatId,
+      senderId,
+      content,
+    );
+
+    this.chatGateway.sendMessage({
+      content,
+      senderId,
+      receiverId:
+        message.chat.sender.id === senderId
+          ? message.chat.receiver.id
+          : message.chat.sender.id,
+      chatId: `${chatId}`,
+    });
+
+    return message;
   }
 }

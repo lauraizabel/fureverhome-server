@@ -149,8 +149,8 @@ export class UsersService {
       phone: updateUserDto.phone || user.phone,
       type: updateUserDto.type || user.type,
       dateOfBirth: updateUserDto.dateOfBirth || user.dateOfBirth,
-      receivedMessages: user.receivedMessages,
-      sentMessages: user.sentMessages,
+      receivedChats: user.receivedChats,
+      sentChats: user.sentChats,
       job: updateUserDto.job || user.job,
       animalTypes: updateUserDto.animalTypes || user.animalTypes,
     } as User;

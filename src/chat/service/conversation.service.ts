@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Chat } from 'src/chat/entity/chat.entity';
 import { Message } from 'src/chat/entity/message.entity';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
@@ -7,6 +8,8 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class ConversationService {
   constructor(
+    @InjectRepository(Chat)
+    private readonly chatRepository: Repository<Chat>,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
     private readonly usersService: UsersService,
@@ -19,57 +22,71 @@ export class ConversationService {
   ) {
     const sender = await this.usersService.findOne(senderId);
     const receiver = await this.usersService.findOne(receiverId);
-    const message = new Message();
-    message.sender = sender;
-    message.receiver = receiver;
-    message.content = content;
-    return this.messageRepository.save(message);
+    const chat = new Chat();
+    chat.sender = sender;
+    chat.receiver = receiver;
+    const savedChat = await this.chatRepository.save(chat);
+    await this.messageRepository.save({
+      chat: savedChat,
+      sender,
+      content,
+    });
+    return this.chatRepository.findOne({
+      where: { id: savedChat.id },
+      relations: ['sender', 'receiver', 'messages', 'messages.sender'],
+    });
+  }
+
+  async saveMessage(chatId: number, senderId: number, content: string) {
+    const sender = await this.usersService.findOne(senderId);
+    const chat = await this.chatRepository.findOne({
+      where: { id: chatId },
+    });
+
+    return this.messageRepository.save({
+      chat,
+      sender,
+      content,
+    });
+  }
+
+  async getMessages(chatId: number) {
+    const chat = await this.chatRepository.findOne({
+      where: { id: chatId },
+      relations: ['messages', 'messages.sender', 'sender', 'receiver'],
+    });
+
+    return chat;
   }
 
   async getConversationsByUser(userId: number) {
-    const conversations = await this.messageRepository.find({
-      where: [
-        {
-          sender: {
-            id: userId,
-          },
-        },
-        {
-          receiver: {
-            id: userId,
-          },
-        },
-      ],
-      order: {
-        createdAt: 'DESC',
-      },
-      relations: ['sender', 'receiver', 'sender.picture', 'receiver.picture'],
+    const chats = await this.chatRepository.find({
+      where: [{ sender: { id: userId } }, { receiver: { id: userId } }],
+      order: { createdAt: 'DESC' },
+      relations: ['sender', 'receiver', 'messages', 'messages.sender'],
     });
 
-    const uniqueConversations = conversations.filter(
-      (conversation, index, self) => {
-        const indexOfDuplicate = self.findIndex(
-          (c) =>
-            c.receiver.id === conversation.receiver.id &&
-            c.sender.id === conversation.sender.id,
-        );
-        return indexOfDuplicate === index;
-      },
-    );
+    const chatList = chats.map((chat) => {
+      const lastMessage = chat.messages[0];
+      const otherUser =
+        chat.sender.id === userId ? chat.receiver : lastMessage.sender;
 
-    const chat = uniqueConversations.map((conversation) => ({
-      user: {
-        id: conversation.receiver.id,
-        name: conversation.receiver.firstName,
-        picture: conversation.receiver?.picture?.url,
-      },
-      lastMessage: {
-        id: conversation.id,
-        content: conversation.content,
-        createdAt: conversation.createdAt,
-      },
-      userSentLastMessage: conversation.sender.id === userId,
-    }));
-    return { chat };
+      return {
+        user: {
+          id: otherUser.id,
+          name: otherUser.firstName,
+          picture: otherUser.picture?.url,
+        },
+        lastMessage: {
+          id: lastMessage.id,
+          content: lastMessage.content,
+          createdAt: lastMessage.createdAt,
+        },
+        userSentLastMessage: lastMessage.sender.id === userId,
+        id: chat.id,
+      };
+    });
+
+    return { chat: chatList };
   }
 }

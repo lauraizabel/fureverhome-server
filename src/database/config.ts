@@ -9,7 +9,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   password: environment.database.password,
   database: environment.database.name,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  url: environment.database.url,
-  ssl: true,
+  // url: environment.database.url,
+  // ssl: true,
   synchronize: true,
 };
