@@ -11,6 +11,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { QueryInterface } from 'src/core/interfaces/query.interface';
+import { AnimalType } from 'src/animals/enum/animal-type.enum';
 
 @Injectable()
 export class AnimalsService {
@@ -22,10 +23,13 @@ export class AnimalsService {
 
   async create(createAnimalDto: CreateAnimalDto, userId: number) {
     const user = await this.userService.findOne(userId);
+    const newUser = this.addAnimalTypeInUser(createAnimalDto.type, user);
+    const updatedUser = await this.userService.update(userId, newUser);
     const animal = await this.animalRepository.create({
       ...createAnimalDto,
-      user,
+      user: updatedUser,
     });
+
     return { ...animal };
   }
 
@@ -49,9 +53,23 @@ export class AnimalsService {
       throw new BadRequestException('Current user is not the animal owner');
     }
 
-    const updatedUser = await this.animalRepository.update(id, updateAnimalDto);
+    if (updateAnimalDto.type !== currentAnimal.type) {
+      const user = await this.userService.findOne(userId);
+      const newUser = this.removeAnimalTypeInUser(currentAnimal.type, user);
+      const updatedUser = await this.userService.update(userId, newUser);
+      const newUser_ = this.addAnimalTypeInUser(
+        updateAnimalDto.type,
+        updatedUser,
+      );
+      await this.userService.update(userId, newUser_);
+    }
 
-    return updatedUser;
+    const updatedAnimal = await this.animalRepository.update(
+      id,
+      updateAnimalDto,
+    );
+
+    return updatedAnimal;
   }
 
   async remove(id: number, userId: number) {
@@ -68,6 +86,10 @@ export class AnimalsService {
 
       await Promise.all(deletedImages);
     }
+
+    const user = await this.userService.findOne(userId);
+    const newUser = this.removeAnimalTypeInUser(currentAnimal.type, user);
+    await this.userService.update(userId, newUser);
 
     return this.animalRepository.remove(id);
   }
@@ -122,5 +144,45 @@ export class AnimalsService {
   async findByUser(userId: number, pageOptionsDto: PageOptionsDto) {
     const user = await this.userService.findOne(userId);
     return this.animalRepository.findByUser(user, pageOptionsDto);
+  }
+
+  private addAnimalTypeInUser(animalType: AnimalType, user: User) {
+    const newUser = { ...user };
+    const { animalTypes } = newUser;
+    const isAnimalTypeInUser = animalTypes.some(
+      (animalType_) => animalType_ === animalType,
+    );
+
+    if (!isAnimalTypeInUser) {
+      newUser.animalTypes = [...animalTypes, animalType];
+      return newUser;
+    }
+
+    return newUser;
+  }
+
+  private removeAnimalTypeInUser(animalType: AnimalType, user: User) {
+    const newUser = { ...user };
+    const { animalTypes } = newUser;
+
+    const hasAnimalType = animalTypes.some(
+      (animalType_) => animalType_ === animalType,
+    );
+
+    if (!hasAnimalType) return newUser;
+
+    const countAnimalType = newUser.animal.filter(
+      (animal) => animal.type === animalType,
+    ).length;
+
+    if (countAnimalType > 1) return newUser;
+
+    const newAnimalTypes = animalTypes.filter(
+      (animalType_) => animalType_ !== animalType,
+    );
+
+    newUser.animalTypes = newAnimalTypes;
+
+    return newUser;
   }
 }
