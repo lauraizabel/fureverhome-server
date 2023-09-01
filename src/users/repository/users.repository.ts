@@ -72,7 +72,7 @@ export class UsersRepository {
         {
           userLatitude: user.userAddress.latitude,
           userLongitude: user.userAddress.longitude,
-          maxDistance: 10,
+          maxDistance: query.proximity || 20,
         },
       );
 

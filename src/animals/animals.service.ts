@@ -110,11 +110,14 @@ export class AnimalsService {
       type: 'animal',
     });
 
-    const animalFiles = animal.files || [];
+    const newAnimal = { ...animal };
+    const animalFiles = newAnimal.files || [];
 
-    animal.files = [...animalFiles, result];
-
-    const updatedAnimal = await this.animalRepository.update(animalId, animal);
+    newAnimal.files = [...animalFiles, result];
+    const updatedAnimal = await this.animalRepository.update(
+      animalId,
+      newAnimal,
+    );
 
     return { ...updatedAnimal };
   }

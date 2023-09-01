@@ -27,7 +27,7 @@ export class AnimalRepository {
   async findAll(query: QueryInterface, user: User) {
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
 
-    if (query.radius && user) {
+    if (query.proximity && user) {
       const userLatitude = user.userAddress.latitude;
       const userLongitude = user.userAddress.longitude;
       queryBuilder
@@ -41,7 +41,7 @@ export class AnimalRepository {
         )
         .setParameter('userLatitude', userLatitude)
         .setParameter('userLongitude', userLongitude)
-        .setParameter('maxDistance', query.radius)
+        .setParameter('maxDistance', query.proximity)
         .getMany();
     }
 
@@ -110,7 +110,7 @@ export class AnimalRepository {
   findOne(id: number) {
     return this.animalRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'files'],
     });
   }
 
