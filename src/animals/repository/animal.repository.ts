@@ -81,13 +81,7 @@ export class AnimalRepository {
       });
     }
 
-    const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
-
-    const pageMetaDto = new PageMetaDto({
-      pageOptionsDto: query,
-      itemCount,
-    });
 
     const animals = entities.map((entity) => {
       if (!entity.user.userAddress) return entity;
@@ -100,7 +94,10 @@ export class AnimalRepository {
 
       return {
         ...entity,
-        distance: distance.toFixed(2),
+        user: {
+          ...entity.user,
+          distance: distance.toFixed(2),
+        },
       };
     });
 
