@@ -34,7 +34,7 @@ export class UsersController {
     const errors = await validate(createUserDto);
 
     if (errors.length > 0) {
-      throw new BadRequestException(errors);
+      throw new BadRequestException({ errors, createUserDto });
     }
 
     return this.usersService.create(createUserDto);

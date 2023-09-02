@@ -96,12 +96,28 @@ export class AnimalRepository {
         ...entity,
         user: {
           ...entity.user,
-          distance: distance.toFixed(2),
+          distance: distance,
         },
       };
     });
 
-    return animals;
+    const sortedAnimals = animals.sort((a: any, b: any) => {
+      return a.user?.distance - b.user?.distance;
+    });
+
+    const parsedAnimals = sortedAnimals.map((animal) => {
+      const { user } = animal;
+      if (!(user as any).distance) return animal;
+      return {
+        ...animal,
+        user: {
+          ...user,
+          distance: (user as any).distance.toFixed(2),
+        },
+      };
+    });
+
+    return parsedAnimals;
   }
 
   findOne(id: number) {
