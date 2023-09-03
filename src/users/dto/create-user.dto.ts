@@ -50,7 +50,6 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
-  @Matches(REGEX_CPF)
   cpf: string;
 
   @IsString()

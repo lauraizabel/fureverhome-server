@@ -14,6 +14,7 @@ import { AddressService } from 'src/address/address.service';
 import { User } from 'src/users/entities/user.entity';
 import { UserAddress } from 'src/users/entities/user-address.entity';
 import { QueryInterface } from 'src/core/interfaces/query.interface';
+import { REGEX_CPF } from 'src/core/consts/errors-content.const';
 
 @Injectable()
 export class UsersService {
@@ -32,6 +33,13 @@ export class UsersService {
 
     if (existUser) {
       throw new BadRequestException('Email already exists');
+    }
+
+    if (createUserDto.cpf) {
+      const isCpfValid = createUserDto.cpf.match(REGEX_CPF);
+      if (!isCpfValid) {
+        throw new BadRequestException('Invalid CPF');
+      }
     }
 
     createUserDto.password = await this.passwordService.hashPassword(
