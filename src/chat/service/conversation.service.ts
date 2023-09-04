@@ -74,7 +74,7 @@ export class ConversationService {
       return {
         user: {
           id: otherUser.id,
-          name: otherUser.firstName,
+          name: `${otherUser.firstName} ${otherUser.lastName}`,
           picture: otherUser.picture?.url,
         },
         lastMessage: {
