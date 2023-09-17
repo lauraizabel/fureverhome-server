@@ -1,17 +1,15 @@
-import { Animal } from 'src/animals/entities/animal.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class File {
+export class UserFile {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -31,9 +29,4 @@ export class File {
     nullable: true,
   })
   user: User;
-
-  @ManyToOne(() => Animal, (animal) => animal.files, {
-    nullable: true,
-  })
-  animal: Animal;
 }

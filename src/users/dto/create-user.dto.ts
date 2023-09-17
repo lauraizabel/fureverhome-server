@@ -16,7 +16,6 @@ import {
   MIN_LENGTH_NAME,
   MIN_LENGTH_PASSWORD,
   REGEX_CNPJ,
-  REGEX_CPF,
 } from 'src/core/consts/errors-content.const';
 import { UserType } from 'src/users/enum/user-type.enum';
 import { AnimalType } from '../../animals/enum/animal-type.enum';
@@ -31,13 +30,8 @@ export class CreateUserDto {
   @IsString({ message: ErrorsMessages.name.alphanumeric })
   @MaxLength(MAX_LENGTH_NAME, { message: ErrorsMessages.name.maxLength })
   @MinLength(MIN_LENGTH_NAME, { message: ErrorsMessages.name.minLength })
-  @IsNotEmpty({ message: ErrorsMessages.name.required })
   lastName: string;
 
-  @MinLength(MIN_LENGTH_PASSWORD, {
-    message: ErrorsMessages.password.minLength,
-  })
-  @IsNotEmpty({ message: ErrorsMessages.password.required })
   password: string;
 
   @IsEmail()

@@ -103,17 +103,45 @@ export class AnimalsService {
   ) {
     const animal = await this.findOne(animalId);
     const { fileName, base64Image } = files;
-    const result = await this.fileService.uploadFile({
+    const result = await this.fileService.uploadAnimalFile(
       base64Image,
       fileName,
-      id: animalId,
-      type: 'animal',
-    });
+      animalId,
+    );
 
     const newAnimal = { ...animal };
     const animalFiles = newAnimal.files || [];
 
     newAnimal.files = [...animalFiles, result];
+    const updatedAnimal = await this.animalRepository.update(
+      animalId,
+      newAnimal,
+    );
+
+    return { ...updatedAnimal };
+  }
+
+  async uploadPictures(
+    animalId: number,
+    files: {
+      base64Image: string;
+      fileName: string;
+    }[],
+  ) {
+    const animal = await this.findOne(animalId);
+    const newFiles = files.map((file) => {
+      return {
+        base64Image: file.base64Image,
+        fileName: file.fileName,
+      };
+    });
+
+    const results = await this.fileService.uploadAnimalFiles(newFiles, animal);
+
+    const newAnimal = { ...animal };
+    const animalFiles = newAnimal.files || [];
+
+    newAnimal.files = [...animalFiles, ...results];
     const updatedAnimal = await this.animalRepository.update(
       animalId,
       newAnimal,

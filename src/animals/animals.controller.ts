@@ -12,11 +12,12 @@ import {
   UploadedFile,
   Query,
   Put,
+  UploadedFiles,
 } from '@nestjs/common';
 import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { PageOptionsDto } from 'src/core/dto/page-options.dto';
 import { QueryInterface } from 'src/core/interfaces/query.interface';
@@ -67,18 +68,38 @@ export class AnimalsController {
       throw new BadRequestException('Missing user');
     }
 
-    const newFile = file
-      ? file.buffer.toString('base64')
-      : req.body.file.base64;
+    const files = req.body.files.map((file) => {
+      return {
+        base64Image: file.buffer.toString('base64'),
+        fileName: file.originalname,
+      };
+    });
 
-    const newName = file ? file.originalname : req.body.file.name;
+    return this.animalsService.uploadPictures(+id, files);
+  }
 
-    const obj = {
-      base64Image: newFile,
-      fileName: newName,
-    };
+  @UseGuards(AuthGuard)
+  @Post(':id/multiple-files')
+  @UseInterceptors(FilesInterceptor('files'))
+  uploadImages(
+    @Param('id') id: string,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Request() req,
+  ) {
+    const user = req.user;
 
-    return this.animalsService.uploadPicture(+id, obj);
+    if (!user) {
+      throw new BadRequestException('Missing user');
+    }
+
+    const newFiles = files.map((file) => {
+      return {
+        base64Image: file.buffer.toString('base64'),
+        fileName: file.originalname,
+      };
+    });
+
+    return this.animalsService.uploadPictures(+id, newFiles);
   }
 
   @UseGuards(AuthGuard)
@@ -124,7 +145,7 @@ export class AnimalsController {
       throw new BadRequestException('Missing user');
     }
 
-    return this.animalsService.findByUser(+id, pageOptionsDto);
+    return this.animalsService.findByUser(user.sub, pageOptionsDto);
   }
 
   @UseGuards(AuthGuard)

@@ -30,12 +30,12 @@ export class UsersController {
 
   @Post()
   @Public()
-  async create(@Body() createUserDto: CreateUserDto) {
-    const errors = await validate(createUserDto);
-
-    if (errors.length > 0) {
-      throw new BadRequestException({ errors, createUserDto });
-    }
+  async create(@Request() req) {
+    const createUserDto = req.body;
+    // const errors = await validate(createUserDto);
+    // if (errors.length > 0) {
+    //   throw new BadRequestException({ errors, createUserDto });
+    // }
 
     return this.usersService.create(createUserDto);
   }

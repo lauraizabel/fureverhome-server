@@ -27,6 +27,12 @@ export class AnimalRepository {
   async findAll(query: QueryInterface, user: User) {
     const queryBuilder = this.animalRepository.createQueryBuilder('animal');
 
+    queryBuilder
+      .andWhere('user.id != :userId', { userId: user.id })
+      .leftJoinAndSelect('animal.user', 'user')
+      .leftJoinAndSelect('user.userAddress', 'userAddress')
+      .leftJoinAndSelect('animal.files', 'files');
+
     if (query.proximity && user) {
       const userLatitude = user.userAddress.latitude;
       const userLongitude = user.userAddress.longitude;
@@ -44,12 +50,6 @@ export class AnimalRepository {
         .setParameter('maxDistance', query.proximity)
         .getMany();
     }
-
-    queryBuilder
-      .andWhere('user.id != :userId', { userId: user.id })
-      .leftJoinAndSelect('animal.user', 'user')
-      .leftJoinAndSelect('user.userAddress', 'userAddress')
-      .leftJoinAndSelect('animal.files', 'files');
 
     if (query.type) {
       queryBuilder.andWhere('animal.type = :type', {
@@ -181,7 +181,6 @@ export class AnimalRepository {
       });
     }
 
-    const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
 
     return entities;

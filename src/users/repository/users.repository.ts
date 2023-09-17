@@ -5,9 +5,6 @@ import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserType } from '../enum/user-type.enum';
-import { PageOptionsDto } from 'src/core/dto/page-options.dto';
-import { PageMetaDto } from 'src/core/dto/page-meta.dto';
-import { PageDto } from 'src/core/dto/page.dto';
 import { calculateHaversineDistance } from 'src/core/helpers/haversine';
 import { QueryInterface } from 'src/core/interfaces/query.interface';
 

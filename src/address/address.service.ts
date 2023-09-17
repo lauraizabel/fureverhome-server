@@ -18,9 +18,7 @@ const buildHereApiUrl = (address: string) => {
 export class AddressService {
   async getCoordinatesByAddress(address: string) {
     const url = buildHereApiUrl(address);
-
     const response = await axios.get<HereGetResponse>(url);
-
     const { items } = response.data;
 
     if (!items.length) {

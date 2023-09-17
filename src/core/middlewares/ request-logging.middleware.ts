@@ -7,7 +7,16 @@ export class RequestLoggingMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     const { method, url } = req;
-    this.logger.log(`[${method}] ${url}`);
+    if (req.body) {
+      this.logger.log(`[${method}] ${url} ${JSON.stringify(req.body)}`);
+    } else if (req.params) {
+      this.logger.log(`[${method}] ${url} ${JSON.stringify(req.params)}`);
+    } else if (req.query) {
+      this.logger.log(`[${method}] ${url} ${JSON.stringify(req.query)}`);
+    } else {
+      this.logger.log(`[${method}] ${url}`);
+    }
+
     next();
   }
 }

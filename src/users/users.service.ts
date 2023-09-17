@@ -74,12 +74,11 @@ export class UsersService {
   async uploadPicture(userId: number, base64Image: string, fileName: string) {
     const user = await this.findOne(userId);
 
-    const result = await this.fileService.uploadFile({
+    const result = await this.fileService.uploadUserFile(
       base64Image,
       fileName,
-      id: userId,
-      type: 'user',
-    });
+      userId,
+    );
 
     user.picture = result;
     try {

@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import { AnimalType } from '../../animals/enum/animal-type.enum';
 import { Chat } from 'src/chat/entity/chat.entity';
+import { UserFile } from 'src/file/entities/user.file.entity';
 
 @Entity()
 export class User {
@@ -51,8 +52,8 @@ export class User {
   animalTypes: AnimalType[];
 
   @JoinColumn()
-  @OneToOne(() => File, (file) => file.user, { nullable: true })
-  picture?: File;
+  @OneToOne(() => UserFile, (userFile) => userFile.user, { nullable: true })
+  picture: UserFile;
 
   @Column()
   type: UserType;
