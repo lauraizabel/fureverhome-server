@@ -70,8 +70,8 @@ export class AnimalsController {
 
     const files = req.body.files.map((file) => {
       return {
-        base64Image: file.buffer.toString('base64'),
-        fileName: file.originalname,
+        base64Image: file.base64,
+        fileName: file.name,
       };
     });
 
