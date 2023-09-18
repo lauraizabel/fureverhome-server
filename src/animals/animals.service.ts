@@ -64,9 +64,14 @@ export class AnimalsService {
       await this.userService.update(userId, newUser_);
     }
 
+    const animalToBeUpdated = {
+      ...updateAnimalDto,
+      files: currentAnimal.files,
+    };
+
     const updatedAnimal = await this.animalRepository.update(
       id,
-      updateAnimalDto,
+      animalToBeUpdated,
     );
 
     return updatedAnimal;
@@ -129,14 +134,8 @@ export class AnimalsService {
     }[],
   ) {
     const animal = await this.findOne(animalId);
-    const newFiles = files.map((file) => {
-      return {
-        base64Image: file.base64Image,
-        fileName: file.fileName,
-      };
-    });
 
-    const results = await this.fileService.uploadAnimalFiles(newFiles, animal);
+    const results = await this.fileService.uploadAnimalFiles(files, animal);
 
     const newAnimal = { ...animal };
     const animalFiles = newAnimal.files || [];
