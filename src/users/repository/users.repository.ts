@@ -122,7 +122,7 @@ export class UsersRepository {
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return this.userRepository.save(updateUserDto);
+    return this.userRepository.save({ ...updateUserDto, id });
   }
 
   remove(id: number) {
