@@ -42,7 +42,6 @@ export class UsersController {
 
   @Post(':id/image')
   @UseInterceptors(FileInterceptor('picture'))
-  @UseGuards(AuthGuard)
   async uploadPicture(
     @Param('id') id: string,
     @UploadedFile()
